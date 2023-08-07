@@ -1,0 +1,86 @@
+name: Build & Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+    - "app/**"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.metadata.outputs.image }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.5.2
+      with:
+        ref: master
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2.2.0
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2.9.1
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2.2.0
+      with:
+        username: nthienan
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name:  Metadata
+      id: metadata
+      run: |
+        commit_id=`git rev-parse --short HEAD`
+        echo "commit_id=$commit_id" >> $GITHUB_OUTPUT
+
+        image="nthienan/file-mgmt-app:master-$commit_id"
+        echo "image=$image" >> $GITHUB_OUTPUT
+
+    - name: Build multi-arch image
+      uses: docker/build-push-action@v4.1.1
+      with:
+        context: ./app
+        push: true
+        tags: |
+          nthienan/file-mgmt-app:latest
+          nthienan/file-mgmt-app:master
+          nthienan/file-mgmt-app:master-${{ steps.metadata.outputs.commit_id }}
+        platforms: linux/amd64,linux/arm64
+
+  deploy:
+    name: Deploy
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2.0.0
+      with:
+        aws-region: ap-southeast-1
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/gh-actions/gh-actions-dev-file-mgmt-app
+        role-session-name: gh-wf-deploy-file-mgmt-app
+
+    - name: Create new task definition
+      id: create_task_def
+      run: |
+        aws --region ap-southeast-1 ecs describe-task-definition \
+          --task-definition file-mgmt-app --query "taskDefinition" > task-definition.json
+
+        new_image=${{ needs.build.outputs.image }}
+        jq --arg version "$new_image" '.containerDefinitions[].image = $version' task-definition.json | jq "del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)" > updated-task-definition.json
+        cat updated-task-definition.json
+
+        new_task_definition=$(aws --region ap-southeast-1 ecs register-task-definition --cli-input-json file://updated-task-definition.json --query 'taskDefinition.taskDefinitionArn' --output text)
+        echo "task_definition=$new_task_definition" >> $GITHUB_OUTPUT
+
+    - name: Update service
+      run: |
+        aws --region ap-southeast-1 ecs update-service \
+          --cluster dev-file-mgmt-app \
+          --service dev-file-mgmt-app \
+          --task-definition ${{ steps.create_task_def.outputs.task_definition }}

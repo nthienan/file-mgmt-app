@@ -1,0 +1,13 @@
+## Python
+**/.venv
+**/.env
+**/__pycache__
+
+## Terraform
+**/.terraform
+**/*.tfstate
+**/*.tfstate.backup
+**/*tfplan.binary
+**/*tfplan.json
+
+**/*-debug.tfvars.json
