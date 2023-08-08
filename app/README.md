@@ -20,7 +20,7 @@ To get started with the development of this application, follow the steps below:
 
     After activating the virtual environment, install the required dependencies:
     ```
-    $ pip install -r app/requirements.txt
+    $ make deps-install
     ```
 
 3. **Start the Application**

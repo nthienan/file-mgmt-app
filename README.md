@@ -45,9 +45,9 @@ For this small project, I've opted for a monorepo, which serves as a centralized
 
 The `infra/` directory houses essential Terraform configuration files, including `variables.tf` and `provider.tf`. Additionally, within the `infra/` directory, there is a `tfvars/` subdirectory that contains corresponding Terraform variable files for each deployment environment. For instance, `tfvars/dev.tfvars` is used for the development environment, `tfvars/stag.tfvars` for the staging environment, and so on.
 
-To streamline development and ensure consistent workflows, I've made use of GitHub Actions in the `.github/` directory. The `workflows/` subdirectory contains `wf-build.yaml`, which automates our continuous integration and `wf-deploy.yaml` for continuous deployment processes.
+To streamline development and ensure consistent workflows, I've made use of GitHub Actions in the `.github/` directory. The `workflows/` subdirectory contains `wf-build-and-deploy.yaml`, which automates continuous integration and continuous deployment processes.
 
-Additionally, the `docs/` folder contains documentation and relevant resources for the project. This includes user guides, API documentation, architecture diagrams, and any other documentation essential for understanding and maintaining the project.
+Additionally, the `docs/` folder contains documentation and relevant resources for the project. This includes architecture diagram, and any other documentation essential for understanding and maintaining the project.
 
 As always, the `README.md` file provides essential project information. This structure allows me to maintain a clean and organized project.
 

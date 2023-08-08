@@ -17,12 +17,12 @@ Follow the steps below to deploy the infrastructure:
 
 3. **Generate Terraform Plan**: Generate the Terraform execution plan to preview the changes that will be applied to the infrastructure:
     ```bash
-    $ make tf-plan
+    $ make tf-plan STAGE=dev
     ```
 
 4. **Deploy Infrastructure**: To deploy the infrastructure, execute the following command:
     ```bash
-    $ make tf-apply
+    $ make tf-apply STAGE=dev
     ```
 
 > [!WARNING]  
