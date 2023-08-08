@@ -1,0 +1,149 @@
+---
+openapi: 3.1.0
+info:
+  title: File Management App
+  version: 0.1.0
+paths:
+  "/files/{file_name}":
+    get:
+      summary: Get File
+      description: |-
+        Endpoint for get a file by name
+        :param file_name: name of file to get
+      operationId: get_file_files__file_name__get
+      parameters:
+      - name: file_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: File Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      summary: Delete File
+      description: |-
+        Endpoint for delete a file by name
+        :param file_name: name of file to delete
+      operationId: delete_file_files__file_name__delete
+      parameters:
+      - name: file_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: File Name
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/files":
+    post:
+      summary: Create File
+      description: |-
+        Endpoint for file upload.
+        :param file: file to upload.
+      operationId: create_file_files_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_create_file_files_post"
+        required: true
+      responses:
+        '201':
+          description: Successfully uploaded the file.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FileItem"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/-/health":
+    get:
+      summary: Healthcheck
+      description: |-
+        Simple healthcheck endpoint
+        :return: "ok" as a response body in plain text
+      operationId: healthcheck___health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Healthcheck   Health Get
+components:
+  schemas:
+    Body_create_file_files_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_create_file_files_post
+    FileItem:
+      properties:
+        name:
+          type: string
+          title: Name
+        md5:
+          type: string
+          title: Md5
+      type: object
+      required:
+      - name
+      title: FileItem
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
