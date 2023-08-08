@@ -26,6 +26,7 @@ The File Management Application is a Python application built on the FastAPI fra
 
     The application has the intelligence to detect files with similar content. Instead of duplicating files, it reuses uploaded files to optimize storage space efficiently.
 
+For details, refer to the API documentation available at https://nthienan.github.io/file-mgmt-app/
 
 ## System Design
 
